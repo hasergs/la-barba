@@ -1,0 +1,52 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-ink-950: #08080c;
+  --color-ink-900: #0b0b0f;
+  --color-ink-800: #14141b;
+  --color-ink-700: #1e1e28;
+  --color-ink-600: #2b2b38;
+  --color-brand-400: #f2b544;
+  --color-brand-500: #e89a1a;
+  --color-brand-600: #c47a0a;
+  --color-accent-400: #38e0b0;
+  --color-danger-400: #ff5d6c;
+  --font-sans:
+    'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+:root {
+  color-scheme: dark;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-ink-950);
+  color: #f5f5f7;
+  font-family: var(--font-sans);
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Evita selección accidental de texto en la UI de cámara */
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Scrollbar discreto */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2b2b38 transparent;
+}
