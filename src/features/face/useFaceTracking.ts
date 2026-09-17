@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import type { RefObject } from 'react';
-import type { Landmark, TrackedFace } from '../../contracts/types';
+import type { Landmark, TrackedFace, VisionDelegate } from '../../contracts/types';
 import { computeTrackingQuality } from './quality';
 import { setCurrentFrame } from './frameStore';
 import { createLandmarkSmoother } from './smoothing';
-import { loadFaceLandmarker } from './useFaceLandmarker';
+import { DEFAULT_VISION_DELEGATE, loadFaceLandmarker } from './useFaceLandmarker';
 
 /** Intervalo mínimo entre inferencias (≈30fps). */
 const MIN_FRAME_INTERVAL_MS = 1000 / 30;
@@ -13,6 +13,8 @@ interface UseFaceTrackingOptions {
   videoRef: RefObject<HTMLVideoElement | null>;
   enabled: boolean;
   onFrame?: (face: TrackedFace) => void;
+  /** Delegado del modelo. Por defecto CPU (GPU es experimental y lento al iniciar). */
+  delegate?: VisionDelegate;
 }
 
 /**
@@ -32,6 +34,7 @@ export function useFaceTracking({
   videoRef,
   enabled,
   onFrame,
+  delegate = DEFAULT_VISION_DELEGATE,
 }: UseFaceTrackingOptions): { ready: boolean; error: string | null } {
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -60,7 +63,7 @@ export function useFaceTracking({
     smootherRef.current.reset();
     lastVideoTimeRef.current = -1;
 
-    loadFaceLandmarker()
+    loadFaceLandmarker(delegate)
       .then((landmarker) => {
         if (cancelled) return;
         setReady(true);
@@ -138,7 +141,7 @@ export function useFaceTracking({
       cancelled = true;
       if (rafId) window.cancelAnimationFrame(rafId);
     };
-  }, [enabled, videoRef]);
+  }, [enabled, videoRef, delegate]);
 
   return { ready, error };
 }

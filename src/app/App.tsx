@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { CameraView, useCameraStream } from '../features/camera';
+import { loadFaceLandmarker, getActiveDelegate } from '../features/face';
 import { OverlayCanvas } from '../features/overlay';
 import { recommendStyles } from '../features/beard';
 import { useAppStore } from '../store/appStore';
@@ -30,6 +31,18 @@ export default function App() {
   const setShowHelp = useAppStore((s) => s.setShowHelp);
 
   const { canInstall, install } = useInstallPrompt();
+  const visionDelegate = useAppStore((s) => s.visionDelegate);
+
+  // Precalienta el modelo (~10 MB) mientras el usuario lee la pantalla de
+  // bienvenida y concede el permiso: la espera percibida baja a casi cero.
+  useEffect(() => {
+    void loadFaceLandmarker(visionDelegate).catch(() => undefined);
+  }, [visionDelegate]);
+
+  useEffect(() => {
+    if (!modelReady) return;
+    useAppStore.getState().setDiagnostics({ delegate: getActiveDelegate() });
+  }, [modelReady]);
 
   // Selecciona automáticamente el mejor estilo la primera vez que hay forma
   // detectada (el usuario puede cambiarlo después).

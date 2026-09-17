@@ -2,8 +2,20 @@ import { create } from 'zustand';
 import type {
   BeardStyleId,
   CameraStatus,
+  Diagnostics,
   FaceShapeResult,
+  VisionDelegate,
 } from '../contracts/types';
+
+const INITIAL_DIAGNOSTICS: Diagnostics = {
+  delegate: null,
+  modelReady: false,
+  frames: 0,
+  fps: 0,
+  landmarks: 0,
+  quality: 0,
+  lastError: null,
+};
 
 /**
  * Estado global de bajo refresco (PM-owned).
@@ -23,6 +35,9 @@ interface AppState {
   unstable: boolean;
   showLandmarks: boolean;
   showHelp: boolean;
+  /** delegado del modelo deseado (CPU por defecto: GPU es experimental). */
+  visionDelegate: VisionDelegate;
+  diagnostics: Diagnostics;
 
   setCamera: (camera: CameraStatus) => void;
   setHasFace: (hasFace: boolean) => void;
@@ -31,7 +46,12 @@ interface AppState {
   setQuality: (quality: number, unstable: boolean) => void;
   toggleLandmarks: () => void;
   setShowHelp: (showHelp: boolean) => void;
+  setVisionDelegate: (delegate: VisionDelegate) => void;
+  /** Mezcla parcial: los hooks publican solo los campos que cambian. */
+  setDiagnostics: (partial: Partial<Diagnostics>) => void;
 }
+
+export const DEFAULT_VISION_DELEGATE: VisionDelegate = 'CPU';
 
 export const useAppStore = create<AppState>((set) => ({
   camera: { state: 'idle', width: 0, height: 0 },
@@ -42,6 +62,8 @@ export const useAppStore = create<AppState>((set) => ({
   unstable: false,
   showLandmarks: false,
   showHelp: false,
+  visionDelegate: DEFAULT_VISION_DELEGATE,
+  diagnostics: INITIAL_DIAGNOSTICS,
 
   setCamera: (camera) => set({ camera }),
   setHasFace: (hasFace) => set({ hasFace }),
@@ -50,4 +72,11 @@ export const useAppStore = create<AppState>((set) => ({
   setQuality: (quality, unstable) => set({ quality, unstable }),
   toggleLandmarks: () => set((s) => ({ showLandmarks: !s.showLandmarks })),
   setShowHelp: (showHelp) => set({ showHelp }),
+  setVisionDelegate: (visionDelegate) =>
+    set((s) => ({
+      visionDelegate,
+      diagnostics: { ...s.diagnostics, delegate: null, modelReady: false, lastError: null },
+    })),
+  setDiagnostics: (partial) =>
+    set((s) => ({ diagnostics: { ...s.diagnostics, ...partial } })),
 }));

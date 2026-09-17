@@ -66,3 +66,44 @@ manteniendo `CameraView` siempre montado y superponiendo `PermissionGate`.
 - Verificación definitiva en móvil físico pendiente (iOS Safari + Android Chrome).
 - `chaikinSmooth` no se usa dentro de `render.ts` para no acoplar agentes; los
   contornos se dibujan rectos (mejora posible: aplicar suavizado en `maskBuilder`).
+
+---
+
+## Incidente 1 — "No aparece ninguna línea ni detección" (corregido)
+
+**Síntoma:** en producción la cámara abría y el vídeo se veía, pero no aparecía
+ninguna línea ni la forma del rostro. Banner "Cargando modelo de rostro…" permanente.
+
+**Evidencia recogida (Fase 1):**
+- Cámara y `<video>`: OK (1280×720, `readyState 4`, sin pausa).
+- Descarga de WASM y modelo: HTTP 200.
+- Sin logs de MediaPipe en consola → el grafo nunca arrancaba.
+- Service Worker: **refutado** como causa (mismo fallo sin SW y con cachés borradas).
+- Prueba aislada en el origen de producción:
+  - `createFromOptions({ delegate: 'GPU' })` → **14.861 ms** y frágil (llegó a tumbar el navegador).
+  - `createFromOptions({ delegate: 'CPU' })` → **68 ms**.
+
+**Causa raíz:** `useFaceLandmarker.ts` intentaba GPU primero y solo caía a CPU si la
+promesa **rechazaba**. El delegate GPU no rechaza: **se cuelga**. Por tanto
+`loadFaceLandmarker()` nunca resolvía y el modelo jamás quedaba listo.
+En `localhost` había funcionado porque GPU resolvió rápido *esa vez*: bug
+dependiente de tiempo/dispositivo (por eso pasaba en móvil y no en la prueba inicial).
+
+**Corrección (un solo cambio, con test que falla primero):**
+- `delegate: 'CPU'` por defecto (`DEFAULT_VISION_DELEGATE`), ~68 ms y estable.
+- GPU opcional, acotado por `DEFAULT_GPU_TIMEOUT_MS = 6000`; si tarda o falla se
+  descarta la instancia tardía (`close()`) y se continúa con CPU.
+- Errores con mensaje claro y reintentables.
+- Precalentado del modelo durante la pantalla de bienvenida (la descarga de ~10 MB
+  ya no espera a que se conceda la cámara).
+- Panel de **diagnóstico en vivo** (botón `?`): delegado, estado del modelo, frames,
+  FPS, landmarks, calidad y error + conmutador CPU/GPU.
+
+**Verificación:**
+- Test de regresión `useFaceLandmarker.test.ts` (6 casos): antes 5 fallos y 21,5 s
+  (se colgaba); ahora 6/6 en 1,5 s.
+- Suite completa: **96 tests** verdes + typecheck estricto.
+- E2E real (`npm run e2e`, Edge + cámara sintética, cuenta píxeles del overlay):
+  - Antes: `"Buscando rostro…"`, 0 píxeles pintados, banner de carga eterno.
+  - Después en producción: `"OK: detecta y dibuja"`, **327.790 píxeles pintados**,
+    detección a los **3,6 s** (antes 24 s en frío).

@@ -193,3 +193,27 @@ export interface TrackedFace {
   /** true cuando la calidad cae por debajo del umbral y debe avisarse */
   unstable: boolean;
 }
+
+/**
+ * Delegado de ejecución del modelo.
+ *
+ * ⚠️ `CPU` es el valor por defecto: medido en producción, `GPU` tardaba
+ * ~14,9 s (y podía colgar el proceso gráfico) frente a ~68 ms de `CPU`.
+ */
+export type VisionDelegate = 'CPU' | 'GPU';
+
+/** Diagnóstico en vivo para verificar el funcionamiento en un dispositivo. */
+export interface Diagnostics {
+  /** delegado realmente en uso (`null` si aún no cargó) */
+  delegate: VisionDelegate | null;
+  modelReady: boolean;
+  /** frames de vídeo procesados desde el inicio */
+  frames: number;
+  /** frames por segundo (ventana de 1 s) */
+  fps: number;
+  /** landmarks recibidos en el último frame */
+  landmarks: number;
+  /** calidad actual 0..1 */
+  quality: number;
+  lastError: string | null;
+}
