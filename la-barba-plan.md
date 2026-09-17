@@ -160,3 +160,32 @@ para verse la cara y seguir la guía mientras se afeita.
   - aviso de calidad solo si la detección se degrada.
 - Verificado en el E2E: `panelsBefore=1`, `panelsAfter=0`, botón de salida presente,
   chip "Paso 1 de 5: Prepara piel y barba" y overlay aún pintando (212.682 px).
+
+---
+
+## Iteración 3 — Bigote, perilla y modo afeitado sin números
+
+**Bigote (no salía bien):** el borde alto subía hasta el subnasal mientras el bajo
+se quedaba en las comisuras, así que la banda tenía espesor cero en los extremos y
+parecía una flecha. Ahora:
+- el borde **inferior sigue el labio superior real** (comisuras + puntos `185/0/409`),
+- el **superior es ese contorno subido 0,05H** → banda de espesor constante y justo
+  bajo la nariz,
+- en *perilla y bigote* las puntas del bigote bajan hasta las esquinas del parche,
+  así el conjunto queda **conectado** (la ficha promete "mentón y bigote conectados").
+
+**Perilla (no estaba correcta):** era una **elipse simétrica** que se salía de la
+cara y arrancaba en el labio. Ahora el parche se construye desde la **cadena
+mandibular real** alrededor del mentón (ventana simétrica) desplazada hacia abajo
+con forma de campana, con borde superior recto bajo el labio inferior. *Perilla
+sola* más corta/estrecha y *perilla y bigote* más larga/ancha.
+
+**Modo afeitado:** ahora deja **solo las líneas**. Se eliminaron el chip de paso,
+la pista y los avisos de texto; únicamente queda el botón discreto para volver (y
+un punto si la detección se degrada, porque entonces las líneas dejan de ser fiables).
+
+**Verificación:** 102 tests verdes (nuevos: espesor constante del bigote, el bigote
+sigue el labio y queda bajo la nariz, la perilla no se sale de la cara, bigote y
+perilla conectados). Banco visual determinista revisado y descartado tras usarlo.
+E2E en producción: `stepElements=0`, `hintElements=0`, `panelsAfter=0`,
+overlay 212.557 px → `"OK: detecta, dibuja y modo afeitado solo con lineas"`.
