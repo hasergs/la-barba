@@ -209,25 +209,6 @@ function ovalArc(frame: FaceFrame): NormPoint[] {
   return FACE_OVAL.slice(start, end + 1).map((index) => frame.point(index));
 }
 
-/** Polígono elíptico cerrado (no se auto-interseca). */
-function ellipsePatch(
-  _frame: FaceFrame,
-  center: NormPoint,
-  halfW: number,
-  halfH: number,
-  samples = 16,
-): NormPoint[] {
-  const points: NormPoint[] = [];
-  for (let i = 0; i < samples; i++) {
-    const angle = (2 * Math.PI * i) / samples;
-    points.push({
-      x: center.x + halfW * Math.cos(angle),
-      y: center.y + halfH * Math.sin(angle),
-    });
-  }
-  return points;
-}
-
 /** Banda cerrada: la línea + la misma línea bajada `downFactor*H`. */
 function bandFromLine(
   line: readonly NormPoint[],
@@ -238,58 +219,119 @@ function bandFromLine(
   return [...line.map((p) => ({ x: p.x, y: p.y })), ...reverse(lower)];
 }
 
-/** Parche de perilla centrado en el eje medio, bajo el labio inferior. */
-function chinPatch(frame: FaceFrame, size: ChinSize): NormPolygon {
+/**
+ * Bordes del bigote, ambos ordenados de IZQUIERDA a DERECHA del usuario
+ * (x decreciente), de modo que `[...bottom, ...reverse(top)]` sea un anillo.
+ *
+ * El borde inferior sigue el labio superior REAL (comisuras + puntos 185/0/409)
+ * y el superior es ese mismo contorno subido una fracción del alto facial: la
+ * banda queda con espesor constante y justo bajo la nariz.
+ *
+ * ⚠️ Antes el borde alto subía hasta el subnasal mientras el bajo se quedaba en
+ * las comisuras, así que la banda se quedaba en nada en los extremos y parecía
+ * una flecha en vez de un bigote.
+ */
+function mustacheEdges(frame: FaceFrame): {
+  bottom: NormPoint[];
+  top: NormPoint[];
+} {
   const H = frame.faceHeight;
   const M = frame.mouthWidth;
-  const chin = frame.point(L.chinMid);
-
-  const halfW = (size === 'small' ? 0.45 : 0.55) * M;
-  const top = frame.point(L.lowerLipBottom).y + 0.005 * H;
-  const bottom = chin.y + (size === 'small' ? 0.085 : 0.1) * H;
-  const center: NormPoint = { x: frame.midlineX, y: (top + bottom) / 2 };
-  const halfH = (bottom - top) / 2;
-
-  return ellipsePatch(frame, center, halfW, halfH);
-}
-
-/** Banda de bigote (hexágono) sobre el labio superior. */
-function mustacheBand(frame: FaceFrame): NormPolygon {
-  const H = frame.faceHeight;
-  const M = frame.mouthWidth;
-  const right = mouthCorner(frame, 'right');
   const left = mouthCorner(frame, 'left');
-  const widen = 0.03 * M;
-
-  const rightOut: NormPoint = { x: right.x - widen, y: right.y };
-  const leftOut: NormPoint = { x: left.x + widen, y: left.y };
-  const rightDown: NormPoint = { x: right.x, y: right.y + 0.025 * H };
-  const leftDown: NormPoint = { x: left.x, y: left.y + 0.025 * H };
-  const topCenter: NormPoint = {
-    x: frame.midlineX,
-    y: frame.point(L.subnasale).y - 0.005 * H,
-  };
-  const bottomCenter: NormPoint = {
-    x: frame.midlineX,
-    y: frame.point(L.upperLipTop).y + 0.015 * H,
-  };
-
-  return [rightOut, topCenter, leftOut, leftDown, bottomCenter, rightDown];
-}
-
-/** Línea superior del bigote (misma que el borde alto de la banda). */
-function mustacheTopLine(frame: FaceFrame): NormPoint[] {
-  const H = frame.faceHeight;
-  const M = frame.mouthWidth;
   const right = mouthCorner(frame, 'right');
-  const left = mouthCorner(frame, 'left');
-  const widen = 0.03 * M;
+  const lipLeft = frame.point(L.upperLipLeft); // 409
+  const lipRight = frame.point(L.upperLipRight); // 185
+  const lipCenter = frame.point(L.upperLipTop); // 0
 
-  return [
-    { x: right.x - widen, y: right.y },
-    { x: frame.midlineX, y: frame.point(L.subnasale).y - 0.005 * H },
-    { x: left.x + widen, y: left.y },
+  const extend = 0.06 * M;
+  const thickness = 0.05 * H;
+
+  const bottom: NormPoint[] = [
+    { x: left.x + extend, y: left.y + 0.01 * H },
+    { x: lipLeft.x, y: lipLeft.y + 0.012 * H },
+    { x: lipCenter.x, y: lipCenter.y + 0.014 * H },
+    { x: lipRight.x, y: lipRight.y + 0.012 * H },
+    { x: right.x - extend, y: right.y + 0.01 * H },
   ];
+
+  return { bottom, top: bottom.map((p) => ({ x: p.x, y: p.y - thickness })) };
+}
+
+/** Banda de bigote cerrada. */
+function mustacheBand(frame: FaceFrame): NormPolygon {
+  const { bottom, top } = mustacheEdges(frame);
+  return [...bottom, ...reverse(top)];
+}
+
+/** Línea guía del bigote: el borde alto (bajo la nariz). */
+function mustacheTopLine(frame: FaceFrame): NormPoint[] {
+  return mustacheEdges(frame).top;
+}
+
+/**
+ * Piezas del parche de perilla.
+ *
+ * El contorno exterior se toma de la CADENA MANDIBULAR real alrededor del
+ * mentón, desplazado hacia abajo una fracción del alto facial (con forma de
+ * campana: 0 en los extremos, máximo en el centro). Así el parche se adapta a
+ * la forma del mentón en lugar de ser una elipse suelta que se salía de la cara.
+ */
+function chinPatchParts(
+  frame: FaceFrame,
+  size: ChinSize,
+): { outer: NormPoint[]; topLeft: NormPoint; topRight: NormPoint } {
+  const H = frame.faceHeight;
+  const spread = size === 'small' ? 2 : 3;
+  const down = (size === 'small' ? 0.09 : 0.13) * H;
+  const chinIndex = JAW_CHAIN.indexOf(L.chinMid);
+
+  const window = JAW_CHAIN.slice(chinIndex - spread, chinIndex + spread + 1)
+    .map((index) => frame.point(index))
+    .reverse(); // izquierda → derecha del usuario
+
+  const last = window.length - 1;
+  const outer = window.map((point, index) => {
+    const u = last === 0 ? 0.5 : index / last;
+    const bulge = 1 - Math.abs(u * 2 - 1);
+    return { x: point.x, y: point.y + down * bulge };
+  });
+
+  const first = outer[0];
+  const lastPoint = outer[last];
+  if (!first || !lastPoint) {
+    throw new Error('No hay suficientes puntos de mandíbula para la perilla.');
+  }
+
+  const lipY = frame.point(L.lowerLipBottom).y;
+  return {
+    outer,
+    topLeft: { x: first.x, y: lipY },
+    topRight: { x: lastPoint.x, y: lipY },
+  };
+}
+
+/** Parche de perilla cerrado: borde alto recto bajo el labio + contorno del mentón. */
+function chinPatch(frame: FaceFrame, size: ChinSize): NormPolygon {
+  const { outer, topLeft, topRight } = chinPatchParts(frame, size);
+  return [topLeft, ...outer, topRight];
+}
+
+/**
+ * Bigote CONECTADO con la perilla: las puntas del bigote bajan hasta las
+ * esquinas superiores del parche, de modo que el conjunto se lee como una
+ * barba de círculo (que es lo que promete la ficha del estilo).
+ */
+function mustacheConnected(frame: FaceFrame, size: ChinSize): NormPolygon {
+  const { bottom, top } = mustacheEdges(frame);
+  const { topLeft, topRight } = chinPatchParts(frame, size);
+  const last = bottom.length - 1;
+  if (last < 0) throw new Error('Bigote sin puntos.');
+
+  const connectedBottom = [...bottom];
+  connectedBottom[0] = { x: topLeft.x, y: topLeft.y };
+  connectedBottom[last] = { x: topRight.x, y: topRight.y };
+
+  return [...connectedBottom, ...reverse(top)];
 }
 
 /** Mueve un punto hacia el centro del rostro `amount` unidades (en 2D). */
@@ -454,7 +496,7 @@ export function buildOverlayModel(
       const neck = neckLine(frame);
       return {
         styleId: style.id,
-        beardZones: [chin, mustacheBand(frame)],
+        beardZones: [chin, mustacheConnected(frame, 'normal')],
         shaveZones: [sidesBand(frame), bandFromLine(neck, 0.16, H)],
         guideLines: [
           {

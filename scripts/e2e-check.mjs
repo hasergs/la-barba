@@ -137,11 +137,11 @@ try {
   const exitButton = await page
     .getByRole('button', { name: 'Mostrar los paneles' })
     .count();
-  const stepChip = await page
-    .getByRole('button', { name: /^Paso \d+ de \d+:/ })
-    .first()
-    .getAttribute('aria-label')
-    .catch(() => null);
+  // En modo afeitado NO debe haber pasos, números ni instrucciones.
+  const stepElements = await page
+    .getByRole('button', { name: /Paso \d+ de \d+/ })
+    .count();
+  const hintElements = await page.getByText(/Toca el paso/).count();
 
   const overlayInShave = await page.evaluate(() => {
     const canvas = document.querySelector('canvas');
@@ -182,7 +182,8 @@ try {
       panelsBefore,
       panelsAfter,
       exitButton,
-      stepChip,
+      stepElements,
+      hintElements,
       overlayPaintedPixels: overlayInShave,
     },
     verdict:
@@ -192,9 +193,10 @@ try {
       panelsBefore > 0 &&
       panelsAfter === 0 &&
       exitButton > 0 &&
-      stepChip !== null &&
+      stepElements === 0 &&
+      hintElements === 0 &&
       (overlayInShave ?? 0) > 500
-        ? 'OK: detecta, dibuja y modo afeitado correcto'
+        ? 'OK: detecta, dibuja y modo afeitado solo con lineas'
         : 'FALLO: revisar deteccion/overlay/modo afeitado',
     logs: logs.filter((l) => !l.includes('beforeinstallprompt')).slice(-10),
   };

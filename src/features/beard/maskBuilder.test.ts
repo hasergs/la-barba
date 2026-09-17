@@ -254,15 +254,90 @@ describe('buildOverlayModel · alineación real', () => {
     expect(first[0]).not.toBe(second[0]);
   });
 
-  it('respeta overrides del fixture (cara desplazada)', () => {
+  it('respeta overrides del fixture (mentón desplazado)', () => {
     const shifted = makeFaceLandmarks({
-      [L.chinMid]: { x: 0.55, y: 0.78 },
+      [L.chinMid]: { x: 0.5, y: 0.78 },
     });
     const frame = createFaceFrame(shifted);
-    expect(frame.point(L.chinMid)).toEqual({ x: 0.55, y: 0.78 });
+    expect(frame.point(L.chinMid)).toEqual({ x: 0.5, y: 0.78 });
+
     const model = buildOverlayModel(getStyleById('chin-only'), shifted);
-    expect(pointInPolygon(frame.point(L.chinMid), model.beardZones[0]!)).toBe(
-      true,
+    const zone = model.beardZones[0]!;
+    expect(pointInPolygon(frame.point(L.chinMid), zone)).toBe(true);
+
+    // La perilla se ha alargado hacia abajo respecto a la cara sin override.
+    const base = buildOverlayModel(getStyleById('chin-only'), makeFaceLandmarks());
+    const lowest = (polygon: typeof zone) =>
+      Math.max(...polygon.map((point) => point.y));
+    expect(lowest(zone)).toBeGreaterThan(lowest(base.beardZones[0]!));
+  });
+
+  it('el bigote tiene espesor constante (no es una flecha)', () => {
+    const frame = createFaceFrame(makeFaceLandmarks());
+    const H = frame.faceHeight;
+    const model = buildOverlayModel(getStyleById('mustache-only'), makeFaceLandmarks());
+    const band = model.beardZones[0]!;
+    // 5 puntos de borde inferior + 5 de borde superior invertidos.
+    expect(band).toHaveLength(10);
+    const last = band.length - 1;
+    for (let i = 0; i < 5; i++) {
+      const bottom = band[i]!;
+      const top = band[last - i]!;
+      expect(bottom.y - top.y).toBeCloseTo(0.05 * H, 6);
+      expect(top.y).toBeCloseTo(bottom.y - 0.05 * H, 6);
+    }
+  });
+
+  it('el bigote sigue el labio superior y queda bajo la nariz', () => {
+    const frame = createFaceFrame(makeFaceLandmarks());
+    const model = buildOverlayModel(getStyleById('mustache-only'), makeFaceLandmarks());
+    const band = model.beardZones[0]!;
+    const nose = frame.point(L.subnasale).y;
+
+    // Cae justo por debajo de la nariz.
+    for (const point of band) {
+      expect(point.y).toBeGreaterThan(nose);
+    }
+    // Contiene los puntos reales del labio superior.
+    for (const index of [L.upperLipLeft, L.upperLipTop, L.upperLipRight]) {
+      expect(pointInPolygon(frame.point(index), band)).toBe(true);
+    }
+  });
+
+  it('la perilla se apoya en la mandíbula real y no se sale de la cara', () => {
+    const frame = createFaceFrame(makeFaceLandmarks());
+    const model = buildOverlayModel(getStyleById('chin-only'), makeFaceLandmarks());
+    const patch = model.beardZones[0]!;
+    const chin = frame.point(L.chinMid);
+
+    // El punto más bajo cae por debajo del mentón.
+    const lowest = patch.reduce((a, b) => (b.y > a.y ? b : a));
+    expect(lowest.y).toBeGreaterThan(chin.y);
+
+    // El ancho de la perilla no supera el de la ventana mandibular usada.
+    const jawXs = JAW_CHAIN.map((index) => frame.point(index).x);
+    const xs = patch.map((point) => point.x);
+    expect(Math.min(...xs)).toBeGreaterThanOrEqual(Math.min(...jawXs) - 1e-6);
+    expect(Math.max(...xs)).toBeLessThanOrEqual(Math.max(...jawXs) + 1e-6);
+  });
+
+  it('perilla y bigote: el bigote queda conectado con la perilla', () => {
+    const model = buildOverlayModel(
+      getStyleById('goatee-mustache'),
+      makeFaceLandmarks(),
     );
+    const patch = model.beardZones[0]!;
+    const mustache = model.beardZones[1]!;
+    const patchTopLeft = patch[0]!;
+    const patchTopRight = patch[patch.length - 1]!;
+
+    // Las puntas del bigote bajan hasta las esquinas superiores del parche.
+    expect(dist(mustache[0]!.x, mustache[0]!.y, patchTopLeft.x, patchTopLeft.y)).toBeLessThan(
+      1e-6,
+    );
+    const mustacheRightEnd = mustache[4]!;
+    expect(
+      dist(mustacheRightEnd.x, mustacheRightEnd.y, patchTopRight.x, patchTopRight.y),
+    ).toBeLessThan(1e-6);
   });
 });
