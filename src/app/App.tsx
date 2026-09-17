@@ -6,6 +6,7 @@ import { recommendStyles } from '../features/beard';
 import { useAppStore } from '../store/appStore';
 import { GuidancePanel } from './components/GuidancePanel';
 import { HelpSheet } from './components/HelpSheet';
+import { ImmersiveHud } from './components/ImmersiveHud';
 import { PermissionGate } from './components/PermissionGate';
 import { StatusBanner } from './components/StatusBanner';
 import { StyleSelector } from './components/StyleSelector';
@@ -29,6 +30,8 @@ export default function App() {
   const showLandmarks = useAppStore((s) => s.showLandmarks);
   const toggleLandmarks = useAppStore((s) => s.toggleLandmarks);
   const setShowHelp = useAppStore((s) => s.setShowHelp);
+  const immersive = useAppStore((s) => s.immersive);
+  const setImmersive = useAppStore((s) => s.setImmersive);
 
   const { canInstall, install } = useInstallPrompt();
   const visionDelegate = useAppStore((s) => s.visionDelegate);
@@ -64,6 +67,14 @@ export default function App() {
     void install();
   }, [install]);
 
+  const handleEnterImmersive = useCallback(() => {
+    setImmersive(true);
+  }, [setImmersive]);
+
+  const handleExitImmersive = useCallback(() => {
+    setImmersive(false);
+  }, [setImmersive]);
+
   return (
     <div className="relative h-dvh w-full overflow-hidden bg-black">
       {/* El <video> debe existir ANTES de pedir getUserMedia, por eso la vista de
@@ -74,34 +85,70 @@ export default function App() {
         <>
           <OverlayCanvas videoRef={videoRef} mirrored={mirrored} />
 
-          <TopBar
-            mirrored={mirrored}
-            onToggleMirror={toggleMirror}
-            showLandmarks={showLandmarks}
-            onToggleLandmarks={toggleLandmarks}
-            canInstall={canInstall}
-            onInstall={handleInstall}
-            onOpenHelp={() => setShowHelp(true)}
-          />
+          {immersive ? (
+            <>
+              <ImmersiveHud onExit={handleExitImmersive} />
+              {modelError ? (
+                <div className="pointer-events-none absolute inset-x-0 top-[calc(env(safe-area-inset-top,0px)+6rem)] z-30 mx-auto flex max-w-md justify-center px-4">
+                  <StatusBanner modelReady={modelReady} modelError={modelError} />
+                </div>
+              ) : null}
+            </>
+          ) : (
+            <>
+              <TopBar
+                mirrored={mirrored}
+                onToggleMirror={toggleMirror}
+                showLandmarks={showLandmarks}
+                onToggleLandmarks={toggleLandmarks}
+                canInstall={canInstall}
+                onInstall={handleInstall}
+                onOpenHelp={() => setShowHelp(true)}
+              />
 
-          <div className="pointer-events-none absolute inset-x-0 top-[calc(env(safe-area-inset-top,0px)+4.75rem)] z-10 mx-auto flex max-w-md justify-center px-4">
-            <StatusBanner modelReady={modelReady} modelError={modelError} />
-          </div>
+              <div className="pointer-events-none absolute inset-x-0 top-[calc(env(safe-area-inset-top,0px)+4.75rem)] z-10 mx-auto flex max-w-md justify-center px-4">
+                <StatusBanner modelReady={modelReady} modelError={modelError} />
+              </div>
 
-          <div className="absolute inset-x-0 bottom-0 z-20 mx-auto flex max-w-md flex-col gap-3 px-4 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
-            <StyleSelector shape={faceShape?.shape ?? null} />
-            <GuidancePanel />
+              <div className="absolute inset-x-0 bottom-0 z-20 mx-auto flex max-w-md flex-col gap-3 px-4 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
+                <StyleSelector shape={faceShape?.shape ?? null} />
+                <GuidancePanel />
 
-            <button
-              type="button"
-              onClick={stop}
-              className="self-center rounded-full px-4 py-1.5 text-[11px] text-white/40 transition hover:text-white/70"
-            >
-              Detener cámara
-            </button>
-          </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handleEnterImmersive}
+                    className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-brand-500 px-4 py-3 text-sm font-semibold text-ink-950 transition active:scale-[0.98]"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden
+                    >
+                      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                    Modo afeitado
+                  </button>
 
-          <HelpSheet />
+                  <button
+                    type="button"
+                    onClick={stop}
+                    className="rounded-2xl bg-white/8 px-4 py-3 text-xs text-white/50 transition hover:text-white/80"
+                  >
+                    Detener
+                  </button>
+                </div>
+              </div>
+
+              <HelpSheet />
+            </>
+          )}
         </>
       ) : (
         <PermissionGate status={status} loading={false} onStart={handleStart} />

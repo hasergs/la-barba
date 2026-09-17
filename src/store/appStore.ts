@@ -35,6 +35,11 @@ interface AppState {
   unstable: boolean;
   showLandmarks: boolean;
   showHelp: boolean;
+  /**
+   * Modo afeitado: oculta los paneles (estilos, información) para dejar la
+   * cara despejada y poder seguir las líneas mirándose en el espejo.
+   */
+  immersive: boolean;
   /** delegado del modelo deseado (CPU por defecto: GPU es experimental). */
   visionDelegate: VisionDelegate;
   diagnostics: Diagnostics;
@@ -46,6 +51,7 @@ interface AppState {
   setQuality: (quality: number, unstable: boolean) => void;
   toggleLandmarks: () => void;
   setShowHelp: (showHelp: boolean) => void;
+  setImmersive: (immersive: boolean) => void;
   setVisionDelegate: (delegate: VisionDelegate) => void;
   /** Mezcla parcial: los hooks publican solo los campos que cambian. */
   setDiagnostics: (partial: Partial<Diagnostics>) => void;
@@ -62,6 +68,7 @@ export const useAppStore = create<AppState>((set) => ({
   unstable: false,
   showLandmarks: false,
   showHelp: false,
+  immersive: false,
   visionDelegate: DEFAULT_VISION_DELEGATE,
   diagnostics: INITIAL_DIAGNOSTICS,
 
@@ -72,6 +79,7 @@ export const useAppStore = create<AppState>((set) => ({
   setQuality: (quality, unstable) => set({ quality, unstable }),
   toggleLandmarks: () => set((s) => ({ showLandmarks: !s.showLandmarks })),
   setShowHelp: (showHelp) => set({ showHelp }),
+  setImmersive: (immersive) => set({ immersive }),
   setVisionDelegate: (visionDelegate) =>
     set((s) => ({
       visionDelegate,

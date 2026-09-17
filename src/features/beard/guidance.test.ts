@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import type { FaceShape } from '../../contracts/types';
-import { BEARD_STYLE_LIST } from './beardStyles';
+import { BEARD_STYLE_LIST, getStyleById } from './beardStyles';
 import { buildGuidance } from './guidance';
+import { makeFaceLandmarks } from './landmarkFixture';
+import { buildOverlayModel } from './maskBuilder';
 
 const SHAPES: readonly FaceShape[] = ['oval', 'round'];
 
@@ -42,7 +44,11 @@ describe('buildGuidance', () => {
         .filter((zone) => zone !== undefined);
       expect(zones.length).toBeGreaterThan(0);
 
-      const styleHasNeck = style.guideLines.some(
+      const model = buildOverlayModel(
+        getStyleById(style.id),
+        makeFaceLandmarks(),
+      );
+      const styleHasNeck = model.guideLines.some(
         (line) => line.kind === 'neck',
       );
       if (styleHasNeck) {

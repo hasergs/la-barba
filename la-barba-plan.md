@@ -107,3 +107,56 @@ dependiente de tiempo/dispositivo (por eso pasaba en móvil y no en la prueba in
   - Antes: `"Buscando rostro…"`, 0 píxeles pintados, banner de carga eterno.
   - Después en producción: `"OK: detecta y dibuja"`, **327.790 píxeles pintados**,
     detección a los **3,6 s** (antes 24 s en frío).
+
+---
+
+## Incidente 2 — Las líneas no se ajustaban al rostro (corregido)
+
+**Síntoma:** los puntos de la malla seguían la cara perfectamente, pero las líneas
+de barba/perfilado quedaban descolocadas respecto al rostro real.
+
+**Causa raíz:** la geometría NO se derivaba de la cara. `BeardStyle` guardaba
+plantillas inventadas a mano en un "espacio canónico" y `createFaceProjector` las
+proyectaba con una **transformación afín global** (escala por ancho de pómulos ×
+alto frente-mentón). Al no usar la forma real (mandíbula, pómulos, comisuras), las
+líneas no encajaban en ningún rostro concreto.
+
+**Corrección:**
+- `BeardStyle` pasa a ser **solo metadatos** (contrato simplificado).
+- Nueva `createFaceFrame(landmarks)`: medidas y utilidades derivadas de los
+  landmarks reales (`faceHeight`, `cheekWidth`, `jawWidth`, `mouthWidth`, `midlineX`).
+- `buildOverlayModel` construye cada estilo con **recetas geométricas ancladas a
+  índices reales** (óvalo facial, cadena mandibular, comisuras, pómulos, goniones,
+  tragiones). Los lados se deciden comparando `x` con la línea media.
+- Zona de barba tipo **"escudo"**: borde superior = líneas de mejilla, borde
+  inferior = línea de cuello (antes era una franja fuera de la cara).
+- Línea de cuello = **arco en U** que une los tragiones bajo el mentón (antes
+  seguía la mandíbula y generaba una "V" profunda).
+- Zona de afeitado = banda de 0,16H bajo la línea de cuello (antes 0,30–0,32H:
+  parecía una flecha gigante).
+- Fixture de tests con proporciones humanas reales (antes la cara era demasiado
+  estrecha y falseaba la revisión visual).
+
+**Verificación visual (banco determinista generado y revisado):** se generó un SVG
+con los 5 estilos sobre una cara sintética, se detectaron y corrigieron los fallos
+(V de barba, V de cuello, salto de polígono en la italiana) y se volvió a revisar.
+Tests de alineación añadidos: la zona contiene la mandíbula, la línea de cuello es
+una U simétrica y queda a <0,1H del mentón, las mejillas terminan en las comisuras,
+la italiana tiene la línea más alta, la línea de mandíbula sigue `JAW_CHAIN`.
+
+---
+
+## Mejora — Modo afeitado (modo inmersivo)
+
+Petición del usuario: poder ocultar los paneles (tipos de barba e información)
+para verse la cara y seguir la guía mientras se afeita.
+
+- Botón **"Modo afeitado"** en el panel inferior.
+- Oculta selector de estilos, ficha de guía, barra superior y avisos neutros.
+- Mantiene el overlay de líneas sobre la cara y añade:
+  - botón discreto para volver a los paneles,
+  - **chip del paso actual** (p. ej. "1 · Prepara piel y barba 1/5") que avanza al
+    tocarlo, para seguir la guía sin ocupar la vista,
+  - aviso de calidad solo si la detección se degrada.
+- Verificado en el E2E: `panelsBefore=1`, `panelsAfter=0`, botón de salida presente,
+  chip "Paso 1 de 5: Prepara piel y barba" y overlay aún pintando (212.682 px).

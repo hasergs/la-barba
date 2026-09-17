@@ -102,20 +102,14 @@ export const MUSTACHE_TOP_CHAIN: readonly number[] = [
 export const LANDMARK_COUNT = 478;
 
 /**
- * ESPACIO CANÓNICO FACIAL (CONGELADO)
- * -----------------------------------
- * Las plantillas de los estilos (`BeardStyle.beardZones`, `.shaveZones`,
- * `.guideLines`) se autoran en un cuadrado canónico `[0..1] x [0..1]` definido
- * por estas 4 anclas sobre la cara detectada:
+ * ANCLAS Y CADENAS PARA GEOMETRÍA DIRIGIDA POR LANDMARKS (CONGELADO)
+ * ------------------------------------------------------------------
+ * La geometría de los estilos se construye AHORA a partir de estos índices
+ * reales (no de plantillas canónicas), de modo que las líneas se ajustan al
+ * rostro concreto del usuario.
  *
- *   cx = 0 → lado de `x0`     cx = 1 → lado de `x1`
- *   cy = 0 → línea de `y0`    cy = 1 → línea de `y1`
- *
- * `maskBuilder` (Agente C) proyecta canónico → frame normalizado:
- *   1. Compensa el roll usando `rollA`/`rollB`.
- *   2. Mapea cx y cy de forma separable con las anclas x/y.
- *
- * En espacio canónico, `midlineX` = 0.5 SIEMPRE (eje de simetría facial).
+ * `CANONICAL_ANCHORS` se mantiene como referencia de medidas faciales
+ * (frente/mentón, tragiones, línea interocular) por si se necesita escala.
  */
 export const CANONICAL_ANCHORS = {
   /** cx = 0 */

@@ -1,12 +1,6 @@
-export {
-  BEARD_STYLES,
-  BEARD_STYLE_LIST,
-  getStyleById,
-  isClosedPolygon,
-  isOpenGuideLine,
-} from './beardStyles';
-export { createFaceProjector, buildOverlayModel } from './maskBuilder';
-export type { FaceProjector } from './maskBuilder';
+export { BEARD_STYLES, BEARD_STYLE_LIST, getStyleById } from './beardStyles';
+export { createFaceFrame, buildOverlayModel } from './maskBuilder';
+export type { FaceFrame } from './maskBuilder';
 export {
   STYLE_FIT_MATRIX,
   recommendStyles,

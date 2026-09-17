@@ -101,24 +101,18 @@ export interface GuideLine {
 }
 
 /**
- * Definición completa de un estilo de barba.
+ * Definición de un estilo de barba.
  *
- * ⚠️ Las geometrías (`beardZones`, `shaveZones`, `guideLines`) están en
- * ESPACIO CANÓNICO FACIAL [0..1]² (ver `CANONICAL_ANCHORS` en `landmarks.ts`),
- * NO en coordenadas del frame. `maskBuilder` las proyecta a frame normalizado
- * y produce un `OverlayModel`.
+ * ⚠️ Es SOLO METADATOS: la geometría (zonas y líneas guía) ya NO se guarda aquí
+ * como plantillas. Se DERIVA de los landmarks reales de la persona dentro de
+ * `features/beard/maskBuilder.ts`, para que las líneas se ajusten a cada rostro
+ * (antes eran plantillas inventadas proyectadas de forma afín y no encajaban).
  */
 export interface BeardStyle {
   id: BeardStyleId;
   name: string;
   tagline: string;
   description: string;
-  /** Zonas rellenas donde debe haber barba (espacio canónico). */
-  beardZones: NormPolygon[];
-  /** Zonas que deben afeitarse por completo (espacio canónico). */
-  shaveZones: NormPolygon[];
-  /** Contornos a los que perfilar (espacio canónico). */
-  guideLines: GuideLine[];
   /** Indicación de longitud/altura recomendada del pelo. */
   lengthHint: string;
   /** Compromiso/mantenimiento 1..5 (1 = fácil, 5 = exigente). */

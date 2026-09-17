@@ -128,6 +128,36 @@ try {
 
   await page.screenshot({ path: 'e2e-result.png' });
 
+  // --- Modo afeitado: los paneles desaparecen y queda el paso actual ---
+  const panelsBefore = await page.getByText('Estilo de barba').count();
+  await page.getByRole('button', { name: 'Modo afeitado' }).click();
+  await page.waitForTimeout(1500);
+
+  const panelsAfter = await page.getByText('Estilo de barba').count();
+  const exitButton = await page
+    .getByRole('button', { name: 'Mostrar los paneles' })
+    .count();
+  const stepChip = await page
+    .getByRole('button', { name: /^Paso \d+ de \d+:/ })
+    .first()
+    .getAttribute('aria-label')
+    .catch(() => null);
+
+  const overlayInShave = await page.evaluate(() => {
+    const canvas = document.querySelector('canvas');
+    if (!canvas) return null;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+    const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    let painted = 0;
+    for (let i = 3; i < data.length; i += 4) {
+      if (data[i] > 8) painted += 1;
+    }
+    return painted;
+  });
+
+  await page.screenshot({ path: 'e2e-shave-mode.png' });
+
   const video = await page.evaluate(() => {
     const element = document.querySelector('video');
     return element
@@ -148,10 +178,24 @@ try {
     statusBanner: banner || null,
     overlay,
     video,
+    shaveMode: {
+      panelsBefore,
+      panelsAfter,
+      exitButton,
+      stepChip,
+      overlayPaintedPixels: overlayInShave,
+    },
     verdict:
-      readyAtMs !== null && overlay && overlay.paintedPixels > 500
-        ? 'OK: detecta y dibuja'
-        : 'FALLO: sin detección o sin overlay',
+      readyAtMs !== null &&
+      overlay &&
+      overlay.paintedPixels > 500 &&
+      panelsBefore > 0 &&
+      panelsAfter === 0 &&
+      exitButton > 0 &&
+      stepChip !== null &&
+      (overlayInShave ?? 0) > 500
+        ? 'OK: detecta, dibuja y modo afeitado correcto'
+        : 'FALLO: revisar deteccion/overlay/modo afeitado',
     logs: logs.filter((l) => !l.includes('beforeinstallprompt')).slice(-10),
   };
   console.log(JSON.stringify(result, null, 2));
