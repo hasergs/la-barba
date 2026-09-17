@@ -37,7 +37,15 @@ de barba, con guía paso a paso. 100% on-device, PWA instalable, deploy en Verce
 - [x] F4 Overlay canvas + coords cover/espejo (D)
 - [x] F5 Integración UI mobile-first + auto-recomendación (PM)
 - [x] F6 QA → 90 tests verdes, typecheck limpio, PWA generada
-- [ ] F7 Deploy Vercel → **pendiente de `vercel login` del propietario**
+- [x] F7 Deploy Vercel + repo GitHub
+
+## Despliegue
+- **Producción:** https://la-barba.vercel.app
+- **Repositorio:** https://github.com/hasergs/la-barba
+- Proyecto Vercel: `sgjaviis-projects/la-barba`
+- Redeploy manual: `npx vercel deploy --prod`
+- Auto-deploy en push: pendiente de conectar el repo desde el panel de Vercel
+  (requiere instalar la GitHub App de Vercel en la cuenta).
 
 ## Verificación realizada
 - `npm run typecheck` → sin errores (strict + noUncheckedIndexedAccess + erasableSyntaxOnly).
