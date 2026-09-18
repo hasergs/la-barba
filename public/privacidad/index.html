@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0b0b0f" />
+    <meta
+      name="description"
+      content="Política de privacidad de La Barba: todo el análisis del rostro ocurre en tu dispositivo y ninguna imagen sale de tu teléfono."
+    />
+    <meta name="robots" content="index, follow" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <title>Política de privacidad — La Barba</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --ink-950: #08080c;
+        --ink-900: #0b0b0f;
+        --ink-800: #14141b;
+        --ink-700: #1e1e28;
+        --brand-400: #f2b544;
+        --brand-500: #e89a1a;
+        --accent-400: #38e0b0;
+        --line: rgba(255, 255, 255, 0.1);
+        --text: #f5f5f7;
+        --muted: #a1a1ad;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: var(--ink-950);
+        color: var(--text);
+        font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        line-height: 1.65;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap {
+        max-width: 44rem;
+        margin: 0 auto;
+        padding: 2.5rem 1.25rem 5rem;
+      }
+      header {
+        border-bottom: 1px solid var(--line);
+        padding-bottom: 1.5rem;
+        margin-bottom: 2rem;
+      }
+      .back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 0.8rem;
+        margin-bottom: 1.25rem;
+      }
+      .back:hover {
+        color: var(--brand-400);
+      }
+      h1 {
+        font-size: 1.85rem;
+        line-height: 1.2;
+        margin: 0 0 0.5rem;
+        color: var(--brand-400);
+        letter-spacing: -0.01em;
+      }
+      .updated {
+        color: var(--muted);
+        font-size: 0.8rem;
+        margin: 0;
+      }
+      h2 {
+        font-size: 1.12rem;
+        margin: 2.5rem 0 0.65rem;
+        color: var(--text);
+      }
+      h3 {
+        font-size: 0.95rem;
+        margin: 1.5rem 0 0.4rem;
+        color: var(--text);
+      }
+      p,
+      li {
+        font-size: 0.92rem;
+        color: #dcdee4;
+      }
+      ul {
+        padding-left: 1.15rem;
+      }
+      li {
+        margin-bottom: 0.4rem;
+      }
+      strong {
+        color: var(--text);
+      }
+      .highlight {
+        background: rgba(56, 224, 176, 0.09);
+        border: 1px solid rgba(56, 224, 176, 0.28);
+        border-radius: 0.9rem;
+        padding: 1rem 1.1rem;
+        margin: 1.5rem 0;
+      }
+      .highlight p {
+        margin: 0;
+        font-size: 0.92rem;
+        color: #d7f5ec;
+      }
+      .card {
+        background: var(--ink-800);
+        border: 1px solid var(--line);
+        border-radius: 0.9rem;
+        padding: 1rem 1.1rem;
+        margin: 1.25rem 0;
+      }
+      .card p:first-child {
+        margin-top: 0;
+      }
+      .card p:last-child,
+      .card ul:last-child {
+        margin-bottom: 0;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        margin: 0.75rem 0;
+        display: block;
+        overflow-x: auto;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 0.5rem 0.6rem;
+        border-bottom: 1px solid var(--line);
+        vertical-align: top;
+      }
+      th {
+        color: var(--brand-400);
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      code {
+        background: var(--ink-700);
+        border-radius: 0.35rem;
+        padding: 0.1rem 0.35rem;
+        font-size: 0.82em;
+        color: var(--accent-400);
+      }
+      a {
+        color: var(--accent-400);
+      }
+      footer {
+        margin-top: 3rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <a class="back" href="/">&#8592; Volver a La Barba</a>
+        <h1>Política de privacidad</h1>
+        <p class="updated">Última actualización: 19 de septiembre de 2026</p>
+      </header>
+
+      <div class="highlight">
+        <p>
+          <strong>Resumen:</strong> La Barba analiza tu rostro
+          <strong>íntegramente dentro de tu dispositivo</strong>. La imagen de la
+          cámara y los puntos faciales que se calculan a partir de ella
+          <strong>no se envían, ni se guardan, ni se comparten</strong> con
+          nosotros ni con terceros. No hay cuentas de usuario, ni analítica, ni
+          cookies de seguimiento.
+        </p>
+      </div>
+
+      <h2>1. Responsable</h2>
+      <p>
+        Esta aplicación («La Barba») es un proyecto cuyo código es público en
+        <a href="https://github.com/hasergs/la-barba" target="_blank" rel="noopener noreferrer"
+          >github.com/hasergs/la-barba</a
+        >. Para cualquier consulta relacionada con la privacidad puedes abrir una
+        incidencia en ese repositorio.
+      </p>
+      <p>
+        Al no tratarse datos personales identificativos (ver apartado 3), no
+        existe un registro de actividades de tratamiento asociado a usuarios
+        individuales.
+      </p>
+
+      <h2>2. Qué hace la aplicación</h2>
+      <ul>
+        <li>Solicita acceso a la <strong>cámara frontal</strong> para verte el rostro.</li>
+        <li>
+          Detecta puntos de referencia faciales y estima tu forma de rostro
+          <strong>en el propio navegador</strong>.
+        </li>
+        <li>
+          Dibuja sobre la imagen en vivo las líneas y zonas de referencia para
+          recortarte la barba.
+        </li>
+      </ul>
+      <p>
+        Todo ello funciona <strong>sin conexión a un servidor propio</strong>: no
+        existe backend que reciba tus imágenes ni tus resultados.
+      </p>
+
+      <h2>3. Qué datos se tratan y dónde</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Dato</th>
+            <th>Dónde se procesa</th>
+            <th>Se conserva</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Imagen de la cámara (vídeo en vivo)</td>
+            <td>En la memoria de tu dispositivo</td>
+            <td>No. Se descarta al cerrar la pestaña; no se graba ni se sube.</td>
+          </tr>
+          <tr>
+            <td>Puntos faciales (landmarks)</td>
+            <td>En tu dispositivo (MediaPipe ejecutado en WebAssembly)</td>
+            <td>No. Solo en memoria mientras la app está abierta.</td>
+          </tr>
+          <tr>
+            <td>Forma del rostro detectada y estilo elegido</td>
+            <td>En la memoria de la pestaña</td>
+            <td>
+              No. Se pierde al recargar. No se usa <code>localStorage</code> ni
+              <code>IndexedDB</code> para guardarlo.
+            </td>
+          </tr>
+          <tr>
+            <td>Cuentas, correo, nombre, ubicación</td>
+            <td>—</td>
+            <td>No se solicitan ni se tratan.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        La aplicación <strong>no incluye</strong> herramientas de analítica,
+        publicidad, mapas de calor, grabación de sesiones ni identificación de
+        usuarios.
+      </p>
+
+      <h2>4. Permisos del dispositivo</h2>
+      <ul>
+        <li>
+          <strong>Cámara:</strong> necesaria para el funcionamiento. Se usa solo
+          mientras la aplicación está abierta y puedes revocarla en cualquier
+          momento desde los ajustes del navegador.
+        </li>
+        <li>
+          <strong>Micrófono y ubicación:</strong> están explícitamente
+          <em>bloqueados</em> por la aplicación (cabecera
+          <code>Permissions-Policy: camera=(self), microphone=(), geolocation=()</code>).
+        </li>
+      </ul>
+      <p>
+        La aplicación requiere una conexión segura (HTTPS), obligatoria para que
+        el navegador permita el acceso a la cámara.
+      </p>
+
+      <h2>5. Servicios de terceros</h2>
+      <p>
+        Aunque tu imagen nunca sale del dispositivo, la aplicación sí descarga
+        recursos técnicos de servicios externos. Como en cualquier petición web,
+        esos servicios reciben tu <strong>dirección IP</strong> y datos técnicos
+        de la petición (por ejemplo, el agente de usuario), necesarios para
+        entregar el contenido y protegerse de abusos.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Servicio</th>
+            <th>Para qué</th>
+            <th>Qué recibe</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>jsDelivr (<code>cdn.jsdelivr.net</code>)</td>
+            <td>Descargar el motor de detección facial (WebAssembly de MediaPipe)</td>
+            <td>IP y datos técnicos de la petición</td>
+          </tr>
+          <tr>
+            <td>Google Cloud Storage (<code>storage.googleapis.com</code>)</td>
+            <td>Descargar el modelo de detección facial</td>
+            <td>IP y datos técnicos de la petición</td>
+          </tr>
+          <tr>
+            <td>Vercel (<code>la-barba.vercel.app</code>)</td>
+            <td>Alojar y servir la aplicación</td>
+            <td>IP y datos técnicos de la petición; registros de acceso del proveedor</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        <strong>En ningún caso</strong> estos servicios reciben la imagen de tu
+        cámara, tus puntos faciales ni el resultado del análisis: son peticiones
+        de descarga de archivos estáticos.
+      </p>
+      <p>
+        El tratamiento que estos proveedores hagan de esos datos técnicos se rige
+        por sus propias políticas de privacidad.
+      </p>
+
+      <h2>6. Almacenamiento en tu dispositivo</h2>
+      <p>
+        Para que la aplicación cargue rápido y pueda funcionar con conexión
+        inestable, el navegador guarda en su <strong>caché</strong> (a través de
+        un <em>service worker</em>) el modelo de detección y el motor de
+        WebAssembly, junto con los archivos de la propia aplicación.
+      </p>
+      <ul>
+        <li>No contiene datos personales ni imágenes.</li>
+        <li>
+          Puedes borrarla desde los ajustes de tu navegador («Borrar datos de
+          navegación / almacenamiento de sitios»).
+        </li>
+      </ul>
+      <p>
+        No se utilizan cookies ni tecnologías similares con fines de seguimiento
+        o publicidad.
+      </p>
+
+      <h2>7. Base jurídica y derechos</h2>
+      <p>
+        Al no tratarse datos personales identificativos, no se aplica la mayoría
+        de obligaciones del Reglamento General de Protección de Datos (RGPD) a
+        los resultados del análisis facial. Las peticiones técnicas a los
+        servicios de terceros del apartado 5 se amparan en el interés legítimo de
+        servir la aplicación de forma segura y funcional.
+      </p>
+      <p>
+        Si resides en una jurisdicción con normativa específica (por ejemplo,
+        RGPD en la Unión Europea, o CCPA en California), puedes contactarnos a
+        través del repositorio para ejercer tus derechos o resolver cualquier
+        duda. Dado que no conservamos datos personales, no hay información que
+        podamos facilitar, rectificar o suprimir sobre ti.
+      </p>
+
+      <h2>8. Menores</h2>
+      <p>
+        La aplicación no está dirigida a menores de 13 años y no recopila
+        conscientemente información de menores.
+      </p>
+
+      <h2>9. Carácter orientativo, no médico</h2>
+      <p>
+        Las líneas y recomendaciones que muestra la aplicación son una
+        <strong>ayuda de referencia estética</strong> basada en estimaciones
+        automáticas, que pueden no ajustarse por completo a tu rostro. No
+        constituyen asesoramiento profesional, sanitario ni de seguridad. Utiliza
+        la herramienta con criterio y las precauciones propias del uso de
+        maquinillas y cuchillas de afeitar.
+      </p>
+
+      <h2>10. Cambios en esta política</h2>
+      <p>
+        Esta política puede actualizarse si cambia el funcionamiento de la
+        aplicación. La fecha de «última actualización» del encabezado refleja la
+        versión vigente. El historial de cambios es consultable en el repositorio
+        público.
+      </p>
+
+      <h2>11. Contacto</h2>
+      <p>
+        Para cualquier consulta sobre esta política o sobre el tratamiento de
+        datos, abre una incidencia en
+        <a href="https://github.com/hasergs/la-barba/issues" target="_blank" rel="noopener noreferrer"
+          >github.com/hasergs/la-barba/issues</a
+        >.
+      </p>
+
+      <footer>
+        <p>
+          La Barba · Política de privacidad ·
+          <a href="/">Volver a la aplicación</a>
+        </p>
+      </footer>
+    </div>
+  </body>
+</html>

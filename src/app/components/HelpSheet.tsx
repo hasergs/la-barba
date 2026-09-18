@@ -111,10 +111,19 @@ export function HelpSheet() {
           </div>
         </div>
 
+        <a
+          href="/privacidad/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-6 block text-center text-[11px] text-white/40 underline decoration-white/20 underline-offset-2 transition hover:text-brand-400"
+        >
+          Política de privacidad
+        </a>
+
         <button
           type="button"
           onClick={() => setShowHelp(false)}
-          className="mt-6 w-full rounded-2xl bg-brand-500 px-6 py-3 text-sm font-semibold text-ink-950 active:scale-[0.98]"
+          className="mt-3 w-full rounded-2xl bg-brand-500 px-6 py-3 text-sm font-semibold text-ink-950 active:scale-[0.98]"
         >
           Entendido
         </button>

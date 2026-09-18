@@ -84,7 +84,15 @@ export function PermissionGate({ status, loading, onStart }: PermissionGateProps
 
       <p className="max-w-xs text-xs leading-relaxed text-white/35">
         Todo el análisis ocurre en tu dispositivo. Ninguna imagen sale de tu
-        teléfono.
+        teléfono.{' '}
+        <a
+          href="/privacidad/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline decoration-white/30 underline-offset-2 transition hover:text-brand-400"
+        >
+          Política de privacidad
+        </a>
       </p>
     </div>
   );
